@@ -72,15 +72,15 @@ The tool includes realistic phishing pages for the following services:
 **sudo python wifiphisher.py**
 
 ### 📡 Deauthentication Attack Only
-**sudo python wifiphisher.py --run-deauth**
+> **sudo python wifiphisher.py --run-deauth**
 
 ### 🔥 Combined Phishing + Deauth Attack
-**sudo python wifiphisher.py --deauth**
+> **sudo python wifiphisher.py --deauth**
 
 > Make sure you have **two Wi-Fi adapters** connected for combined mode.
 
 ### ✅ Update Command 
-**python wifiphisher.py --update** 
+> **python wifiphisher.py --update** 
 
 ---
 
