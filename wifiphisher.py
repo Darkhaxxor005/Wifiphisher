@@ -12,8 +12,30 @@ from colorama import Fore, Style, init
 init(autoreset=True)
 iface2 = None
 networks = []
-version = "1.0"  # ← Version
+version = "1.0"  
 
+
+def revert_to_user():
+    if os.geteuid() == 0:
+        original_user = os.environ.get("SUDO_USER")
+        if not original_user:
+            print(f"\n{Fore.RED}🔴 Cannot determine non-root user to revert to.")
+            sys.exit(1)
+
+        script_path = os.path.abspath(sys.argv[0])
+        args = sys.argv[1:]  # Keep any passed arguments
+        relaunch_cmd = ["sudo", "-u", original_user, "python3", script_path] + args
+
+        print(f"\n{Fore.YELLOW}🟡 Running as root. Re-executing as user: {Fore.GREEN}{original_user}")
+        try:
+            subprocess.run(relaunch_cmd)
+            sys.exit(0)  # Exit root process after re-launch
+        except Exception as e:
+            print(f"\n{Fore.RED}🔴 Failed to re-execute as user {original_user}: {e}")
+            sys.exit(1)
+    else:
+        print(f"\n{Fore.GREEN}🟢 Running as non-root user: {os.environ.get('USER')}")
+        
 def updater():
     version_url = "https://raw.githubusercontent.com/Darkhaxxor005/Wifiphisher/refs/heads/main/version.txt"
     current_dir = os.getcwd()
@@ -27,8 +49,9 @@ def updater():
         remote_version = response.text.strip()
 
         if version < remote_version:
+            revert_to_user()
             print(f"\n{Fore.YELLOW}📦 Update available: {Fore.GREEN}{remote_version} {Fore.YELLOW}(current: {version})")
-            print(f"\n{Fore.CYAN}🚀 Updating...")
+            print(f"\n{Fore.CYAN}🚀 Updating...\n")
 
             # Clone the new repo
             subprocess.run(["git", "clone", "https://github.com/Darkhaxxor005/Wifiphisher.git"], check=True)
@@ -223,11 +246,10 @@ except KeyboardInterrupt:
         exit()
 
 def check():
+    updater()
     if os.geteuid() != 0:
        print(Fore.RED + "\n[!] Run this script as root.\n")
-       sys.exit(1)
-       
-    updater()
+       sys.exit(1)   
        
     def is_installed_binary(cmd):
         return shutil.which(cmd) is not None
