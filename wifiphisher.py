@@ -12,7 +12,7 @@ from colorama import Fore, Style, init
 init(autoreset=True)
 iface2 = None
 networks = []
-version = "1.0"  # ← Version
+version = "1.1"  # ← Version
 
 def updater():
     version_url = "https://raw.githubusercontent.com/Darkhaxxor005/Wifiphisher/refs/heads/main/version.txt"
