@@ -69,7 +69,7 @@ The tool includes realistic phishing pages for the following services:
 ## 🚀 Usage
 
 ### 🔐 Captive Portal Phishing Only
-**sudo python wifiphisher.py**
+> **sudo python wifiphisher.py**
 
 ### 📡 Deauthentication Attack Only
 > **sudo python wifiphisher.py --run-deauth**
