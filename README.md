@@ -12,6 +12,7 @@
 - ✅ Deauthentication Attack
 - ✅ Combined Deauth + Phishing Workflow
 - ✅ Host Fake Login Pages for 30+ Popular Platforms
+- ✅ Update Check
 - ✅ Clean Console Output & Simplified Usage
 
 ---
@@ -60,7 +61,7 @@ The tool includes realistic phishing pages for the following services:
 
 - ✅ At least **one** Wi-Fi adapter with **monitor mode** support for basic functionality.
 - ✅ **Two** Wi-Fi adapters required to run both **deauthentication** and **captive portal phishing** simultaneously.
-- 💻 Python 3.x and necessary modules (install via `pip` as needed).
+- 💻 A laptop or computer.
 - 📡 Linux environment with support for wireless injections (Kali Linux recommended).
 
 ---
@@ -77,6 +78,9 @@ The tool includes realistic phishing pages for the following services:
 **sudo python wifiphisher.py --deauth**
 
 > Make sure you have **two Wi-Fi adapters** connected for combined mode.
+
+### ✅ Update Command 
+**python wifiphisher.py --update** 
 
 ---
 
