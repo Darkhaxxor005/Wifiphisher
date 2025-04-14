@@ -166,7 +166,7 @@ def select_interface():
         print(Fore.RED + "\n🔴 No wireless interfaces found.")
         exit(1)
     
-    print(Fore.CYAN + "\n📶 Available Wireless Interfaces 🔽\n")
+    print(Fore.CYAN + "\n📶 Available Wireless Interfaces \n")
     for i, iface in enumerate(interfaces, 1):
         print(f"{i}. {iface}")
     
