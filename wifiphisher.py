@@ -12,7 +12,7 @@ from colorama import Fore, Style, init
 init(autoreset=True)
 iface2 = None
 networks = []
-version = "1.0"  
+version = "1.1"  
 
 def banner():
     print(Fore.GREEN + Style.BRIGHT + r"""
@@ -195,7 +195,7 @@ def scan_networks(mon_interface):
         mon_interface
     ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-    time.sleep(5)
+    time.sleep(10)
     proc.send_signal(signal.SIGINT)
     time.sleep(2)
 
@@ -327,7 +327,7 @@ ap_max_inactivity={inactivity}
     print(f"\n{Fore.GREEN}📁 Created {Fore.YELLOW}hostapd.conf")
 
     # Create dnsmasq.conf
-    dnsmasq_conf = """interface=wlan0
+    dnsmasq_conf = f"""interface={iface2}
 dhcp-range=10.0.0.10,10.0.0.100,12h
 dhcp-option=3,10.0.0.1
 dhcp-option=6,10.0.0.1
@@ -421,17 +421,17 @@ def engine():
     print(f"\n{Fore.YELLOW}🔧 Starting Apache2 server...")
     run_command("sudo systemctl start apache2")
 
-    # Step 3: Set IP for wlan0 interface
-    print(f"\n{Fore.YELLOW}🔧 Setting IP for wlan0...")
-    run_command("sudo ip addr flush dev wlan0")
-    run_command("sudo ip addr add 10.0.0.1/24 dev wlan0")
-    run_command("sudo ip link set wlan0 up")
+    # Step 3: Set IP for interface interface
+    print(f"\n{Fore.YELLOW}🔧 Setting IP for {iface2}...")
+    run_command(f"sudo ip addr flush dev {iface2}")
+    run_command(f"sudo ip addr add 10.0.0.1/24 dev {iface2}")
+    run_command(f"sudo ip link set {iface2} up")
 
     # Step 4: Apply iptables rules
     print(f"\n{Fore.YELLOW}🔧 Applying iptables rules...")
     run_command("sudo iptables -t nat -F")
     run_command("sudo iptables -F")
-    run_command("sudo iptables -t nat -A PREROUTING -i wlan0 -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80")
+    run_command(f"sudo iptables -t nat -A PREROUTING -i {iface2} -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80")
     run_command("sudo iptables -A FORWARD -p tcp -d 10.0.0.1 --dport 80 -j ACCEPT")
 
     # Step 5: Start dnsmasq
@@ -501,7 +501,7 @@ def cleanup():
     run_command("sudo iptables -t nat -F")
     run_command("sudo iptables -F")
 
-    # Step 4: Bring wlan0 down
+    # Step 4: Bring interface down
     print(f"\n{Fore.YELLOW}🔧 Bringing {iface2} interface down...")
     run_command(f"sudo ifconfig {iface2} down")
 
@@ -509,7 +509,7 @@ def cleanup():
     print(f"\n{Fore.YELLOW}🔧 Starting Network Manager...")
     run_command("sudo systemctl start NetworkManager")
 
-    # Step 6: Bring wlan0 up
+    # Step 6: Bring interface up
     print(f"\n{Fore.YELLOW}🔧 Bringing {iface2} interface up...")
     run_command(f"sudo ifconfig {iface2} up")
 
