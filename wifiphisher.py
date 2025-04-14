@@ -784,12 +784,12 @@ def listener():
         time.sleep(1)  # Poll every 1 second
 
 def main():
-    try:
-        banner()
+    try:        
         if '--update' in sys.argv:
             banner()
             updater()
             exit()
+        banner()
         check()
         if '--deauth' in sys.argv:
             subprocess.Popen(['gnome-terminal', '--', 'python3', sys.argv[0], '--run-deauth'])
