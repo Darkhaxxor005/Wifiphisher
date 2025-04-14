@@ -63,6 +63,8 @@ The tool includes realistic phishing pages for the following services:
 - ✅ **Two** Wi-Fi adapters, one **Monitor mode supported** and one **AP mode suppported**, required to run both **deauthentication** and **captive portal phishing** simultaneously.
 - 💻 Python.
 - 📡 Linux environment with support for wireless injections (Kali Linux recommended).
+> iw list | grep -A 10 "Supported interface modes"
+> Use this command to check if your adapters support AP and Monitor
 
 ---
 
