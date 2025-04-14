@@ -6,6 +6,12 @@
 
 ---
 
+## 🎯 Changelog v1.1
+
+- Fixed bug for fake access point interface.
+
+---
+
 ## 🎯 Features
 
 - ✅ Captive Portal Phishing
