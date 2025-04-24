@@ -75,7 +75,7 @@ The tool includes realistic phishing pages for the following services:
 ## ⚙️ Requirements
 
 - ✅ At least **one** Wi-Fi adapter with **AP mode** support for **captive portal phishing** functionality.
-- ✅ At least **One** Wi-Fi adapter with **monitor mode** support for **deauthentication** functionality.
+- ✅ At least **one** Wi-Fi adapter with **monitor mode** support for **deauthentication** functionality.
 - ✅ **Two** Wi-Fi adapters, one **Monitor mode supported** and one **AP mode suppported**, required to run both **deauthentication** and **captive portal phishing** simultaneously.
 - 💻 Python 3.11 or higher.
 - 📡 Kali Linux.
