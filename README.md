@@ -22,7 +22,7 @@
 
 - ✅ Captive Portal Phishing
 - ✅ Deauthentication Attack
-- ✅ Combined Deauth + Phishing Workflow
+- ✅ Combined Attack (Deauth + Phishing)
 - ✅ Host Fake Login Pages for 30+ Popular Platforms
 - ✅ Update Check
 - ✅ Clean Console Output & Simplified Usage
