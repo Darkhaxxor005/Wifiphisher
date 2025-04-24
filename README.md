@@ -6,8 +6,14 @@
 
 ---
 
-## 🎯 Changelog v1.1
+## 🎯 Changelog 
+### v1.2
+- Fixed bug in wifi deauth interface.
+- Added update check.
+- Added wifi interface compatibility check.
+- Added chipset name in interface selection.
 
+### v1.1
 - Fixed bug for fake access point interface.
 
 ---
@@ -20,6 +26,9 @@
 - ✅ Host Fake Login Pages for 30+ Popular Platforms
 - ✅ Update Check
 - ✅ Clean Console Output & Simplified Usage
+- ✅ Adapter compatibility check
+- ✅ Auto Update
+- ✅ Auto cleanup
 
 ---
 
@@ -66,11 +75,12 @@ The tool includes realistic phishing pages for the following services:
 ## ⚙️ Requirements
 
 - ✅ At least **one** Wi-Fi adapter with **AP mode** support for **captive portal phishing** functionality.
+- ✅ At least **One** Wi-Fi adapter with **monitor mode** support for **deauthentication** functionality.
 - ✅ **Two** Wi-Fi adapters, one **Monitor mode supported** and one **AP mode suppported**, required to run both **deauthentication** and **captive portal phishing** simultaneously.
-- 💻 Python.
-- 📡 Linux environment with support for wireless injections (Kali Linux recommended).
+- 💻 Python 3.11 or higher.
+- 📡 Kali Linux.
 
-### 📡 Check Adapter Compatibility
+### 📡 Check Adapter Modes
 > iw list | grep -A 10 "Supported interface modes"
 
 
