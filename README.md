@@ -26,9 +26,9 @@
 - ✅ Host Fake Login Pages for 30+ Popular Platforms
 - ✅ Update Check
 - ✅ Clean Console Output & Simplified Usage
-- ✅ Adapter compatibility check
+- ✅ Adapter Compatibility Check
 - ✅ Auto Update
-- ✅ Auto cleanup
+- ✅ Auto Cleanup
 
 ---
 
