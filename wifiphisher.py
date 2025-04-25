@@ -12,7 +12,7 @@ from colorama import Fore, Style, init
 init(autoreset=True)
 iface2 = None
 networks = []
-version = "1.2"  
+version = "1.3"  
 
 def banner():
     print(Fore.GREEN + Style.BRIGHT + r"""
@@ -184,12 +184,8 @@ def run_command(command):
         print(f"{Fore.RED}🔴 Error executing: {Fore.YELLOW}{command}{Fore.RESET}")
 
 def get_wireless_interfaces():
-    result = subprocess.run(["iwconfig"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
-    interfaces = []
-    for line in result.stdout.splitlines():
-        if "IEEE 802.11" in line:
-            iface = line.split()[0]
-            interfaces.append(iface)
+    result = subprocess.run(["iw", "dev"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+    interfaces = re.findall(r'Interface\s+(\w+)', result.stdout)
     return interfaces
 
 def get_chipset_info():
