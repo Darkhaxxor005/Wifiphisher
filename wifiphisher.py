@@ -436,10 +436,19 @@ dhcp-range=10.0.0.10,10.0.0.100,12h
 dhcp-option=3,10.0.0.1
 dhcp-option=6,10.0.0.1
 
-# These are the most important lines:
+# Android
 address=/connectivitycheck.gstatic.com/10.0.0.1
 address=/clients3.google.com/10.0.0.1
 address=/connectivitycheck.android.com/10.0.0.1
+
+# Apple
+address=/captive.apple.com/10.0.0.1
+
+# Windows
+address=/www.msftconnecttest.com/10.0.0.1
+address=/ipv6.msftconnecttest.com/10.0.0.1
+
+# Catch-all (use with caution!)
 address=/#/10.0.0.1
 """
     with open("dnsmasq.conf", "w") as f:
