@@ -175,6 +175,12 @@ def check():
         print(f"\n{Fore.GREEN}🟢 gnome-terminal is already installed.")
     else:
         install('gnome-terminal')
+
+    # Check and install dnsmasq
+    if is_installed_binary('dnsmasq'):
+        print(f"\n{Fore.GREEN}🟢 dnsmasq is already installed.")
+    else:
+        install('dnsmasq')
      
 def run_command(command):
     try:
@@ -519,32 +525,36 @@ RewriteRule ^.*$ /index.html [L]"""
         print(f"\n{Fore.RED}🔴 Failed to write to {original_conf}. {Fore.RESET}Run with sudo.")
     
 def engine():
-    # Step 1: Stop Network Manager
+    # Step 1: Stop hostapd and dnsmasq
+    print(f"\n{Fore.YELLOW}🔧 Stopping hostapd and dnsmasq...")
+    run_command("sudo killall hostapd dnsmasq")
+    
+    # Step 2: Stop Network Manager
     print(f"\n{Fore.YELLOW}🔧 Stopping Network Manager...")
     run_command("sudo systemctl stop NetworkManager")
 
-    # Step 2: Start Apache2 server
+    # Step 3: Start Apache2 server
     print(f"\n{Fore.YELLOW}🔧 Starting Apache2 server...")
     run_command("sudo systemctl start apache2")
 
-    # Step 3: Set IP for interface interface
+    # Step 4: Set IP for interface interface
     print(f"\n{Fore.YELLOW}🔧 Setting IP for {iface2}...")
     run_command(f"sudo ip addr flush dev {iface2}")
     run_command(f"sudo ip addr add 10.0.0.1/24 dev {iface2}")
     run_command(f"sudo ip link set {iface2} up")
 
-    # Step 4: Apply iptables rules
+    # Step 5: Apply iptables rules
     print(f"\n{Fore.YELLOW}🔧 Applying iptables rules...")
     run_command("sudo iptables -t nat -F")
     run_command("sudo iptables -F")
     run_command(f"sudo iptables -t nat -A PREROUTING -i {iface2} -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80")
     run_command("sudo iptables -A FORWARD -p tcp -d 10.0.0.1 --dport 80 -j ACCEPT")
 
-    # Step 5: Start dnsmasq
+    # Step 6: Start dnsmasq
     print(f"\n{Fore.YELLOW}🔧 Starting dnsmasq...")
     run_command("sudo dnsmasq -C dnsmasq.conf")
 
-    # Step 6: Start hostapd
+    # Step 7: Start hostapd
     print(f"\n{Fore.YELLOW}🔧 Starting hostapd...")
     run_command("sudo hostapd hostapd.conf -B")
 
