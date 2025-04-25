@@ -7,6 +7,9 @@
 ---
 
 ## 🎯 Changelog 
+### v1.3
+- Fixed wireless interface detection bug.
+  
 ### v1.2
 - Fixed bug in wifi deauth interface.
 - Added update check.
