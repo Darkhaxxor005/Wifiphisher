@@ -9,6 +9,7 @@
 ## 🎯 Changelog 
 ### v1.3
 - Fixed wireless interface detection bug.
+- More specific dnsmasq config file.
   
 ### v1.2
 - Fixed bug in wifi deauth interface.
