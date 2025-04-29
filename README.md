@@ -117,7 +117,7 @@ The tool includes realistic phishing pages for the following services:
 ### ✅ Log Command
 > **sudo python wifiphisher.py --options --log**
 
-> Will store the logs in **log.txt** file about command executions.
+> Store the logs in **log.txt** file about the command execution result.
 
 ---
 
