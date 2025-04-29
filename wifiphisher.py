@@ -171,6 +171,12 @@ def check():
         install('hostapd')
 
     # Check and install gnome-terminal
+    if is_installed_binary('dnsmasq'):
+        print(f"\n{Fore.GREEN}🟢 dnsmasq is already installed.")
+    else:
+        install('dnsmasq')
+        
+    # Check and install gnome-terminal
     if is_installed_binary('gnome-terminal'):
         print(f"\n{Fore.GREEN}🟢 gnome-terminal is already installed.")
     else:
