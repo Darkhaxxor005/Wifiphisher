@@ -12,7 +12,7 @@ from colorama import Fore, Style, init
 init(autoreset=True)
 iface2 = None
 networks = []
-version = "1.3"  
+version = "1.4"  
 
 def banner():
     print(Fore.GREEN + Style.BRIGHT + r"""
@@ -34,7 +34,7 @@ def banner():
     
 def check_internet():
     try:
-        response = requests.get("https://www.google.com", timeout=5)
+        response = requests.get("https://raw.githubusercontent.com/Darkhaxxor005/Wifiphisher/refs/heads/main/version.txt", timeout=2)
         if response.status_code == 200:
             print(Fore.GREEN + "\n🟢 Internet is connected.")
             return
@@ -48,7 +48,7 @@ def check_internet():
   
 def check_update():
     try:
-        response = requests.get("https://www.google.com", timeout=5)
+        response = requests.get("https://raw.githubusercontent.com/Darkhaxxor005/Wifiphisher/refs/heads/main/version.txt", timeout=2)
         if response.status_code == 200:
             print(Fore.GREEN + "\n🟢 Internet is connected.")
             version_url = "https://raw.githubusercontent.com/Darkhaxxor005/Wifiphisher/refs/heads/main/version.txt"
@@ -175,19 +175,26 @@ def check():
         print(f"\n{Fore.GREEN}🟢 gnome-terminal is already installed.")
     else:
         install('gnome-terminal')
-
-    # Check and install dnsmasq
-    if is_installed_binary('dnsmasq'):
-        print(f"\n{Fore.GREEN}🟢 dnsmasq is already installed.")
-    else:
-        install('dnsmasq')
      
+LOG_ENABLED = False
+
 def run_command(command):
     try:
-        subprocess.run(command, shell=True, check=True)
-        print(f"\n{Fore.GREEN}🟢 Successfully executed: {Fore.YELLOW}{command}")
-    except subprocess.CalledProcessError:
+        result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
+        print(f"\n{Fore.GREEN}🟢 Successfully executed: {Fore.YELLOW}{command}{Fore.RESET}")
+        if LOG_ENABLED:
+            with open("log.txt", "a") as f:
+                f.write(f"\n🟢 Successfully executed: {command}\n")
+                f.write(result.stdout.strip() + "\n")
+    except subprocess.CalledProcessError as e:
         print(f"{Fore.RED}🔴 Error executing: {Fore.YELLOW}{command}{Fore.RESET}")
+        if LOG_ENABLED:
+            with open("log.txt", "a") as f:
+                f.write(f"\n🔴 Error executing: {command}\n")
+                if e.stderr:
+                    f.write(e.stderr.strip() + "\n")
+                else:
+                    f.write("\n🟢 No error output\n")
 
 def get_wireless_interfaces():
     result = subprocess.run(["iw", "dev"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
@@ -525,7 +532,7 @@ RewriteRule ^.*$ /index.html [L]"""
         print(f"\n{Fore.RED}🔴 Failed to write to {original_conf}. {Fore.RESET}Run with sudo.")
     
 def engine():
-    # Step 1: Stop hostapd and dnsmasq
+    # Step 1: Stop hostapd and dnsmasq (For secirity purposes)
     print(f"\n{Fore.YELLOW}🔧 Stopping hostapd and dnsmasq...")
     run_command("sudo killall hostapd dnsmasq")
     
@@ -900,26 +907,38 @@ def listener():
         time.sleep(1)  # Poll every 1 second
 
 def main():
-    try:        
+    global LOG_ENABLED
+
+    try:
+        if '--log' in sys.argv:
+            LOG_ENABLED = True
+            open("log.txt", "w").close()
+
         if '--update' in sys.argv:
             banner()
             updater()
             exit()
+
         banner()
         check_update()
         check()
+
         if '--deauth' in sys.argv:
             subprocess.Popen(['gnome-terminal', '--', 'python3', sys.argv[0], '--run-deauth'])
+
         setup()
         time.sleep(2)
         os.system('clear')
+
         script_dir = os.path.dirname(os.path.realpath(__file__))
         os.chdir(script_dir)
+
         banner()
         webclone()
         engine()
         time.sleep(2)
         os.system('clear')
+
         banner()
         listener()
 
