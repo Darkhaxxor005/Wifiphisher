@@ -20,7 +20,7 @@
 ### v1.2
 - Fixed bug in wifi deauth interface.
 - Added update check.
-- Added wifi interface compatibility check.
+- Added Wi-Fi interface compatibility check.
 - Added chipset name in interface selection.
 
 ### v1.1
