@@ -12,6 +12,7 @@
 - Added log option.
 - Fixed code stuck at update check.
 - Added proccess killing to prevent conflict.
+- Added help command.
   
 ### v1.3
 - Fixed wireless interface detection bug.
@@ -115,9 +116,28 @@ The tool includes realistic phishing pages for the following services:
 > **python wifiphisher.py --update**
 
 ### ✅ Log Command
-> **sudo python wifiphisher.py --options --log**
+> **sudo python wifiphisher.py [options] --log**
 
 > Store the logs in **log.txt** file about the command execution result.
+
+### ✅ Help Command
+>**sudo python wifiphisher.py --help**
+
+>wifiphisher.py [options] --log    Log enabled.
+wifiphisher.py [options]                Log disabled.
+
+Available Options [Optional]:
+
+--deauth              Run deauthentication attack and captive portal phishing simultaneously.
+--run-deauth    Run only deauthentication attack.
+--update              Update the tool.
+
+Example:
+
+wifiphisher.py --log	
+wifiphisher.py 		
+wifiphisher --update
+wifiphisher --deauth --log
 
 ---
 
