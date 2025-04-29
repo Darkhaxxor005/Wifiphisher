@@ -10,7 +10,7 @@
 
 ### v1.4
 - Added log option.
-- Fixed code stuck at (Checking for updates..).
+- Fixed code stuck at update check.
 - Added proccess killing to prevent conflict.
   
 ### v1.3
