@@ -14,6 +14,25 @@ iface2 = None
 networks = []
 version = "1.4"  
 
+help = """
+wifiphisher.py [options] --log    Log enabled.
+wifiphisher.py [options]                Log disabled.
+
+Available Options [Optional]:
+
+--deauth              Run deauthentication attack and captive portal phishing simultaneously.
+--run-deauth    Run only deauthentication attack.
+--update              Update the tool.
+
+Example:
+
+wifiphisher.py --log	
+wifiphisher.py 		
+wifiphisher --update
+wifiphisher --deauth --log
+
+"""
+
 def banner():
     print(Fore.GREEN + Style.BRIGHT + r"""
 ⠀⠀⠀⠀⠀⠀⠀⣀⣤⣶⣿⠷⠾⠛⠛⠛⠛⠷⠶⢶⣶⣤⣄⡀⠀⠀⠀⠀⠀⠀
@@ -916,6 +935,10 @@ def main():
     global LOG_ENABLED
 
     try:
+        if '--help' in sys.argv:
+            print(help)
+            exit()
+
         if '--log' in sys.argv:
             LOG_ENABLED = True
             open("log.txt", "w").close()
