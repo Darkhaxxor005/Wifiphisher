@@ -7,6 +7,11 @@
 ---
 
 ## 🎯 Changelog 
+
+### v1.4
+- Added log option
+- Fixed code stuck at (Checking for updates..)
+  
 ### v1.3
 - Fixed wireless interface detection bug.
 - More specific dnsmasq config file.
@@ -105,7 +110,12 @@ The tool includes realistic phishing pages for the following services:
 > Make sure you have **two Wi-Fi adapters** connected for combined mode.
 
 ### ✅ Update Command 
-> **python wifiphisher.py --update** 
+> **python wifiphisher.py --update**
+
+### ✅ Log Command
+> **sudo python wifiphisher.py --options --log**
+
+> Will store the logs in **log.txt** file about command executions.
 
 ---
 
