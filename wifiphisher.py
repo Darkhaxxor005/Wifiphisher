@@ -13,6 +13,9 @@ init(autoreset=True)
 iface2 = None
 networks = []
 version = "1.4"  
+script_dir = os.path.dirname(os.path.realpath(__file__))
+hostapd = f'gnome-terminal -- bash -c "cd \\"{script_dir}\\" && sudo hostapd hostapd.conf; exec bash"'
+
 
 help = """
 wifiphisher.py [options] --log    Log enabled.
@@ -440,6 +443,9 @@ def clear_csv_files():
         
 try:
    if '--run-deauth' in sys.argv:
+       if '--log' in sys.argv:
+            LOG_ENABLED = True
+            open("log.txt", "w").close()
        enable()
 except KeyboardInterrupt:
         print(Fore.RED + "\n🔴 Ctrl + C triggered. Cleaning up and exiting...")
@@ -588,7 +594,7 @@ def engine():
 
     # Step 7: Start hostapd
     print(f"\n{Fore.YELLOW}🔧 Starting hostapd...")
-    run_command("sudo hostapd hostapd.conf -B")
+    run_command(hostapd)
 
     # Final confirmation
     print(f"\n{Fore.GREEN}🟢 All services started successfully. Fake AP is now running.")
