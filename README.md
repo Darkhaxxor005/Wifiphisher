@@ -9,8 +9,9 @@
 ## 🎯 Changelog 
 
 ### v1.4
-- Added log option
-- Fixed code stuck at (Checking for updates..)
+- Added log option.
+- Fixed code stuck at (Checking for updates..).
+- Added proccess killing to prevent conflict.
   
 ### v1.3
 - Fixed wireless interface detection bug.
