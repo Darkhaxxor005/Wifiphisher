@@ -39,6 +39,7 @@
 - ✅ Adapter Compatibility Check
 - ✅ Auto Update
 - ✅ Auto Cleanup
+- ✅ Log Option
 
 ---
 
