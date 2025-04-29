@@ -123,22 +123,6 @@ The tool includes realistic phishing pages for the following services:
 ### ✅ Help Command
 >**sudo python wifiphisher.py --help**
 
->wifiphisher.py [options] --log    Log enabled.
->wifiphisher.py [options]                Log disabled.
-
->Available Options [Optional]:
-
->--deauth              Run deauthentication attack and captive portal phishing simultaneously.
->--run-deauth    Run only deauthentication attack.
->--update              Update the tool.
-
->Example:
-
->wifiphisher.py --log	
->wifiphisher.py 		
->wifiphisher --update
->wifiphisher --deauth --log
-
 ---
 
 ## 📌 Disclaimer
